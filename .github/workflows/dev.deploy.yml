@@ -9,11 +9,18 @@ on:
 jobs:
   test_and_deploy:
     runs-on: ubuntu-latest
+
+    environment: "${{ 
+      fromJson('{
+        \"main\": \"prod\", 
+      }')[github.ref_name] 
+    }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build Docker Image
-        run: docker build . -t ${{ vars.IMAGE_TAG }}:latest -f Dockerfile
+        run: docker build . -t ${{ vars.IMAGE_TAG }}:latest
       - name: Run Tests in Docker
         run: docker run -e CI=true --rm ${{ vars.IMAGE_TAG }}:latest npm test
       - name: Log in to Docker Hub
@@ -36,7 +43,7 @@ jobs:
             docker rm ${{ vars.CONTAINER_NAME }} || true
             docker run -d \
               --name ${{ vars.CONTAINER_NAME }} \
-              -p 80:${{ vars.APP_PORT }} \
+              -p ${{ vars.VPS_PORT }}:${{ vars.APP_PORT }} \
               -e DB_HOST=${{ vars.DB_HOST }} \
               -e DB_PORT=${{ vars.DB_PORT }} \
               -e DB_USERNAME=${{ vars.DB_USERNAME }} \
@@ -44,66 +51,3 @@ jobs:
               -e DB_NAME=${{ vars.DB_NAME }} \
               -e APP_PORT=${{ vars.APP_PORT }} \
               ${{ vars.IMAGE_TAG }}:latest
-
-
-
-
-      # - name: Extract Docker image metadata
-      #   id: meta
-      #   uses: docker/metadata-action@v5
-      #   with:
-      #     images: ${{ vars.IMAGE_TAG }}
-      # - name: Build Docker images
-      #   run: docker build . -t ${{ vars.IMAGE_TAG }}:latest -f Dockerfile
-      # - name: Run tests
-      #   run: docker run -e CI=true --rm andriihalai/${{ vars.CONTAINER_NAME }}:latest npm test
-      # - name: Echo success message
-      #   run: echo "Build and test completed successfully!"
-      
-      # - name: Log in to Docker Hub
-      #   uses: docker/login-action@v3
-      #   with:
-      #     username: ${{ vars.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '18'
-      
-  # run_test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '18'
-  #     - run: npm install
-  #     - run: npm test
-  #     - name: Cache node_modules
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: node_modules
-  #         key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-  #     - name: Save build artifacts
-  #       run: npm run build
-  #     - name: Upload dist
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: dist
-  #         path: dist/
-
-  # build_and_deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: run_test
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '18'
-  #     - name: Download dist
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: dist
-  #         path: dist/
-  #     - name: Deploy to Dev environment
-  #       run: |
-  #         echo "Deploying using downloaded dist..."
