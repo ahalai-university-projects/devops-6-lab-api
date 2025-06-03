@@ -24,6 +24,27 @@ jobs:
       - name: Push Docker Image
         run: docker push andriihalai/admin-panel-api:latest
 
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            docker pull andriihalai/admin-panel-api:latest
+            docker stop admin-panel-api || true
+            docker rm admin-panel-api || true
+            docker run -d \
+              --name admin-panel-api \
+              -p 80:8000 \
+              -e DB_HOST=${{ vars.DB_HOST }} \
+              -e DB_PORT=${{ vars.DB_PORT }} \
+              -e DB_USERNAME=${{ vars.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_NAME=${{ vars.DB_NAME }} \
+              -e APP_PORT=${{ vars.APP_PORT }} \
+              andriihalai/admin-panel-api:latest
+
 
 
 
