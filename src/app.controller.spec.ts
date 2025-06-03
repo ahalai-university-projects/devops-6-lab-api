@@ -20,7 +20,7 @@ describe('AppController', () => {
 
   describe('getHealth', () => {
     it('should return "OK"', () => {
-      expect(appController.getHealth()).toBe('OK');
+      expect(appController.getHealth()).toBe('OK!!!');
     });
   });
 });

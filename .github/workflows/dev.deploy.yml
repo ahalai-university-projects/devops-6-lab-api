@@ -21,6 +21,8 @@ jobs:
         run: docker build . -t andriihalai/admin-panel-api:latest -f Dockerfile
       - name: Run tests
         run: docker run -e CI=true --rm andriihalai/admin-panel-api:latest npm test
+      - name: Echo success message
+        run: echo "Build and test completed successfully!"
       
       # - name: Log in to Docker Hub
       #   uses: docker/login-action@v3
