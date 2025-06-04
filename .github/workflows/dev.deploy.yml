@@ -6,18 +6,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    - name: Install Dependencies 
-      run: npm install
-    - name: Run Linting
-      run: npx eslint "src/**/*.{js,ts,jsx,tsx}"
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Dependencies 
+        run: npm install
+      - name: Run Linting
+        run: npx eslint "src/**/*.{js,ts,jsx,tsx}"
 
   semgrep:
     runs-on: ubuntu-latest
